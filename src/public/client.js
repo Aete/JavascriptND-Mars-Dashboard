@@ -1,9 +1,9 @@
 let store = Immutable.Map({
   user: { name: 'Student' },
   rovers: Immutable.Map({
-    curiosity: Immutable.Map({ name: 'Curiosity' }),
-    opportunity: Immutable.Map({ name: 'Opportunity' }),
-    spirit: Immutable.Map({ name: 'Spirit' }),
+    Curiosity: Immutable.Map({ name: 'Curiosity' }),
+    Opportunity: Immutable.Map({ name: 'Opportunity' }),
+    Spirit: Immutable.Map({ name: 'Spirit' }),
   }),
   selectedRover: 'Curiosity',
 });
@@ -17,24 +17,25 @@ const render = async (root, state) => {
 
 // create content
 const App = (state) => {
-  const rovers = state.get('rovers');
-  const name = store.get('user').name;
+  const name = state.get('user').name;
   const selectedRover = state.get('selectedRover');
-  const rover = rovers.get('roverInfo');
-  if (selectedRover !== rover.get('name')) {
-    getImageOfTheDay(state);
-  }
-  console.log(rover, image);
-  console.log(state);
+  const rover = state.get('rovers').get(selectedRover);
+  const roverArray = Object.keys(state.get('rovers').toObject());
+  const image = rover.get('image');
   return `
           <header>
-          ${Title(name)}
+          ${Title()}
             <nav>
-              ${Selecting(rovers, selectedRover)}
+            ${Selecting(roverArray, selectedRover)}
             </nav>
           </header>
           <main>              
               <section>
+                ${
+                  image
+                    ? `<img src=${image} /> ${RoverDashboard(rover)}`
+                    : `<p>Loading...</p>`
+                }
               </section>
           </main>
           <footer></footer>
@@ -42,22 +43,27 @@ const App = (state) => {
 };
 
 // listening for load event because page should load before any JS is called
-window.addEventListener('load', () => {
-  getImageOfTheDay(store);
+window.addEventListener('load', async () => {
+  const newState = await getRoverInfo(store);
+  updateStore(store, newState);
 });
 
 // update store with new state
 const updateStore = (state, newState) => {
+  console.log(newState);
   store = state.merge(newState);
+  console.log(store);
   render(root, store);
 };
 
 // update store with a new assigned rover
-const updateRover = (rover) => {
+const updateRover = async (rover) => {
   updateStore(store, { selectedRover: rover });
+  if (!store.get('rovers').get(rover).get('image')) {
+    const newState = await getRoverInfo(store);
+    updateStore(store, newState);
+  }
 };
-
-const updateRoverInfo = (state) => {};
 
 // ------------------------------------------------------  COMPONENTS
 
@@ -97,24 +103,35 @@ const RoverDashboard = (roverInfo) => {
 
 // ------------------------------------------------------  API CALLS
 
-const getImageOfTheDay = (state) => {
-  const rover = state.get('selectedRover').toLowerCase();
-  if (state.get('rovers').get(rover)) {
-    console.log(state.get('rovers').get(rover).get('image'));
-  }
-  fetch(`http://localhost:3000/rover`, {
-    method: 'POST',
-    body: JSON.stringify({ rover }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((res) => {
-      return res.json();
+const getRoverInfo = async (state) => {
+  const rover = state.get('selectedRover');
+  if (!state.get('rovers').get(rover).get('image')) {
+    return await fetch('http://localhost:3000/rover', {
+      method: 'POST',
+      body: JSON.stringify({ rover }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
-    .then((responseJSON) => {
-      const image = responseJSON.image.img_src;
-      const roverInfo = responseJSON.image.rover;
-      console.log(image, roverInfo);
-    });
+      .then((res) => {
+        return res.json();
+      })
+      .then((responseJSON) => {
+        const image = responseJSON.image.img_src;
+        const {
+          name,
+          launch_date,
+          landing_date,
+          status,
+        } = responseJSON.image.rover;
+        return state.setIn(
+          ['rovers', rover],
+          Immutable.Map({ image, name, launch_date, landing_date, status })
+        );
+      })
+      .catch((err) => {
+        console.log('error', err);
+      });
+  }
+  return state;
 };
