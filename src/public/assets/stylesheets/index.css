@@ -36,3 +36,11 @@ footer {
 @media (min-width: 1824px) {
   /* use mobile */
 }
+
+.nav__rover {
+  font-weight: 300;
+}
+
+.nav__rover-selected {
+  font-weight: 700;
+}
