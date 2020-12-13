@@ -13,11 +13,15 @@ header {
   align-items: center;
 }
 
+header h1 {
+  margin-bottom: 0;
+}
+
 main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 nav ul {
@@ -32,12 +36,17 @@ nav ul {
   box-sizing: border-box;
 }
 
+nav ul li {
+  padding: 10px 20px;
+}
+
 .nav__rover {
   font-weight: 300;
 }
 
 .nav__rover-selected {
   font-weight: 700;
+  border-bottom: 1px solid #848484;
 }
 
 section {
@@ -51,10 +60,21 @@ section {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  margin-top: 20px;
 }
 
 .section__img img {
   width: 100%;
+}
+
+.image_anno {
+  color: #969696;
+  font-style: italic;
+}
+
+.image_anno .bold {
+  font-weight: 700;
 }
 
 .loader {

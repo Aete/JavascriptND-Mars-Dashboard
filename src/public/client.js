@@ -32,11 +32,7 @@ const App = (state) => {
           <main>              
               <section>
               <div class='section__img'>
-                ${
-                  image
-                    ? `<img src=${image.get('image_src')} />`
-                    : `${Loading()}`
-                }
+                ${image ? `${MarsImage(image, selectedRover)}` : `${Loading()}`}
               </div>
                 ${RoverDashboard(rover)}
               </section>
@@ -92,6 +88,16 @@ const Loading = () => {
   </div>`;
 };
 
+const MarsImage = (image, rover) => {
+  return `<img src=${image.get('image_src')} alt=${
+    'a picture taken by ' + rover
+  }/>
+  <p class="image_anno">This picture was taken by
+    <span class="bold">${rover}</span> on 
+    <span class="bold">${image.get('image_date')}</span>
+  </p>`;
+};
+
 const RoverDashboard = (roverInfo) => {
   const rover = roverInfo.get('name');
   const landing_date = roverInfo.get('landing_date');
@@ -123,6 +129,7 @@ const getRoverInfo = async (state) => {
         const image = Immutable.Map({
           image_src: responseJSON.image.img_src,
           image_date: responseJSON.image.earth_date,
+          image_camera: responseJSON.image.camera.name,
         });
         const {
           name,
