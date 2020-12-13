@@ -31,11 +31,14 @@ const App = (state) => {
           </header>
           <main>              
               <section>
+              <div class='section__img'>
                 ${
                   image
-                    ? `<img src=${image} /> ${RoverDashboard(rover)}`
-                    : `<p>Loading...</p>`
+                    ? `<img src=${image.get('image_src')} />`
+                    : `${Loading()}`
                 }
+              </div>
+                ${RoverDashboard(rover)}
               </section>
           </main>
           <footer></footer>
@@ -50,9 +53,7 @@ window.addEventListener('load', async () => {
 
 // update store with new state
 const updateStore = (state, newState) => {
-  console.log(newState);
   store = state.merge(newState);
-  console.log(store);
   render(root, store);
 };
 
@@ -77,13 +78,18 @@ const Selecting = (rovers, selectedRover) => {
             ${rovers
               .map((rover) => {
                 if (rover !== selectedRover) {
-                  return `<li class="nav__rover" onClick="updateRover('${rover}')">${rover}</li>`;
+                  return `<li class="nav__rover" onClick="updateRover('${rover}')"><div>${rover}</div></li>`;
                 } else {
-                  return `<li class="nav__rover-selected" onClick="updateRover('${rover}')">${rover}</li>`;
+                  return `<li class="nav__rover-selected" onClick="updateRover('${rover}')"><div>${rover}</div></li>`;
                 }
               })
               .join('')}
         </ul>`;
+};
+
+const Loading = () => {
+  return `<div class="loader">
+  </div>`;
 };
 
 const RoverDashboard = (roverInfo) => {
@@ -99,10 +105,7 @@ const RoverDashboard = (roverInfo) => {
   </ul>`;
 };
 
-// Example of a pure function that renders infomation requested from the backend
-
 // ------------------------------------------------------  API CALLS
-
 const getRoverInfo = async (state) => {
   const rover = state.get('selectedRover');
   if (!state.get('rovers').get(rover).get('image')) {
@@ -117,7 +120,10 @@ const getRoverInfo = async (state) => {
         return res.json();
       })
       .then((responseJSON) => {
-        const image = responseJSON.image.img_src;
+        const image = Immutable.Map({
+          image_src: responseJSON.image.img_src,
+          image_date: responseJSON.image.earth_date,
+        });
         const {
           name,
           launch_date,
