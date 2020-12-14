@@ -34,7 +34,7 @@ const App = (state) => {
               <div class='section__img'>
                 ${image ? `${MarsImage(image, selectedRover)}` : `${Loading()}`}
               </div>
-                ${RoverDashboard(rover)}
+                ${image ? RoverDashboard(rover) : ''}
               </section>
           </main>
           <footer></footer>
@@ -93,7 +93,8 @@ const MarsImage = (image, rover) => {
     'a picture taken by ' + rover
   }/>
   <p class="image_anno">This picture was taken by
-    <span class="bold">${rover}</span> on 
+    <span class="bold">${rover}</span> with
+    <span class="bold">${image.get('image_camera')}</span> on 
     <span class="bold">${image.get('image_date')}</span>
   </p>`;
 };
@@ -103,11 +104,11 @@ const RoverDashboard = (roverInfo) => {
   const landing_date = roverInfo.get('landing_date');
   const launch_date = roverInfo.get('launch_date');
   const status = roverInfo.get('status');
-  return `<ul>
-    <li>${rover}</li>
-    <li>${launch_date}</li>
-    <li>${landing_date}</li>
-    <li>${status}</li>
+  return `<ul class="dashboard">
+    <li>Rover: ${rover}</li>
+    <li>Launch date: ${launch_date}</li>
+    <li>Landing date: ${landing_date}</li>
+    <li>Status: ${status}</li>
   </ul>`;
 };
 

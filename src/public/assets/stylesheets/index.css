@@ -14,6 +14,7 @@ header {
 }
 
 header h1 {
+  font-size: 23px;
   margin-bottom: 0;
 }
 
@@ -30,10 +31,12 @@ nav ul {
   justify-content: space-between;
   height: 50px;
   list-style-type: none;
+  margin-top: 0;
   margin-left: 0;
-  padding-left: 50px;
-  padding-right: 50px;
+  padding-left: 20px;
+  padding-right: 20px;
   box-sizing: border-box;
+  width: 100%;
 }
 
 nav ul li {
@@ -62,6 +65,8 @@ section {
   align-items: center;
   flex-direction: column;
   margin-top: 20px;
+  width: 300px;
+  height: 300px;
 }
 
 .section__img img {
@@ -87,6 +92,18 @@ section {
   animation: spin 1.5s linear infinite;
 }
 
+.dashboard {
+  list-style-type: none;
+  margin-top: 30px;
+  width: 300px;
+  padding-left: 0;
+  font-size: 20px;
+}
+
+.dashboard li {
+  margin-bottom: 8px;
+}
+
 /* Safari */
 @-webkit-keyframes spin {
   0% {
@@ -108,14 +125,10 @@ section {
 
 /* -------------------  TABLET  --------------------- */
 @media (min-width: 768px) {
-  /* use mobile */
-}
-
-/* -------------------  DESKTOP  -------------------- */
-
-@media (min-width: 1224px) {
   nav ul {
     width: 500px;
+    padding-left: 50px;
+    padding-right: 50px;
   }
 
   .section__img {
@@ -124,8 +137,30 @@ section {
   }
 }
 
+/* -------------------  DESKTOP  -------------------- */
+
+@media (min-width: 1224px) {
+  nav ul {
+    width: 500px;
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+
+  .section__img {
+    width: 500px;
+  }
+}
+
 /* -------------------  LARGE SCREENS  -------------- */
 
 @media (min-width: 1824px) {
-  /* use mobile */
+  nav ul {
+    width: 600px;
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+
+  .section__img {
+    width: 600px;
+  }
 }
