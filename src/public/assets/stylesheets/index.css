@@ -148,6 +148,7 @@ section {
 
   .section__img {
     width: 500px;
+    height: 500px;
   }
 }
 
@@ -162,5 +163,6 @@ section {
 
   .section__img {
     width: 600px;
+    height: 600px;
   }
 }
