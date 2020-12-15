@@ -18,16 +18,12 @@ app.use('/', express.static(path.join(__dirname, '../public')));
 app.post('/rover', async (req, res) => {
   try {
     const rover = req.body.rover;
-    const maxSol = await fetch(`
-    https://api.nasa.gov/mars-photos/api/v1/manifests/${rover}/?api_key=${process.env.API_KEY}`)
-      .then((res) => res.json())
-      .then((res) => res.photo_manifest.max_sol);
     const image = await fetch(
-      `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?sol=${maxSol}&api_key=${process.env.API_KEY}`
+      `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/latest_photos?api_key=${process.env.API_KEY}`
     )
       .then((res) => res.json())
       .then((images) => {
-        return images.photos[0];
+        return images.latest_photos.slice(0, 15);
       });
     res.send({ image });
   } catch (err) {

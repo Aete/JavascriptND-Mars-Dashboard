@@ -1,5 +1,4 @@
 let store = Immutable.Map({
-  user: { name: 'Student' },
   rovers: Immutable.Map({
     Curiosity: Immutable.Map({ name: 'Curiosity' }),
     Opportunity: Immutable.Map({ name: 'Opportunity' }),
@@ -17,7 +16,6 @@ const render = async (root, state) => {
 
 // create content
 const App = (state) => {
-  const name = state.get('user').name;
   const selectedRover = state.get('selectedRover');
   const rover = state.get('rovers').get(selectedRover);
   const roverArray = Object.keys(state.get('rovers').toObject());
@@ -26,15 +24,19 @@ const App = (state) => {
           <header>
           ${Title()}
             <nav>
-            ${Selecting(roverArray, selectedRover)}
+              <ul>
+                ${Selecting(roverArray, selectedRover)}
+              </ul>
             </nav>
           </header>
           <main>              
               <section>
-              <div class='section__img'>
-                ${image ? `${MarsImage(image, selectedRover)}` : `${Loading()}`}
+              <div class='section__imgGrid'>
+                ${RenderingImage(image, selectedRover)}
               </div>
+              <ul class="dashboard">
                 ${image ? RoverDashboard(rover) : ''}
+              </ul>
               </section>
           </main>
           <footer></footer>
@@ -70,17 +72,19 @@ const Title = () => {
 };
 
 const Selecting = (rovers, selectedRover) => {
-  return `<ul>
-            ${rovers
-              .map((rover) => {
-                if (rover !== selectedRover) {
-                  return `<li class="nav__rover" onClick="updateRover('${rover}')"><div>${rover}</div></li>`;
-                } else {
-                  return `<li class="nav__rover-selected" onClick="updateRover('${rover}')"><div>${rover}</div></li>`;
-                }
-              })
-              .join('')}
-        </ul>`;
+  return rovers
+    .map((rover) => {
+      if (rover !== selectedRover) {
+        return `<li class="nav__rover" onClick="updateRover('${rover}')"><div>${rover}</div></li>`;
+      } else {
+        return `<li class="nav__rover-selected" onClick="updateRover('${rover}')"><div>${rover}</div></li>`;
+      }
+    })
+    .join('');
+};
+
+const RenderingImage = (image, rover) => {
+  return image ? MarsImageGrid(image, rover) : Loading();
 };
 
 const Loading = () => {
@@ -88,15 +92,14 @@ const Loading = () => {
   </div>`;
 };
 
-const MarsImage = (image, rover) => {
-  return `<img src=${image.get('image_src')} alt=${
-    'a picture taken by ' + rover
-  }/>
-  <p class="image_anno">This picture was taken by
-    <span class="bold">${rover}</span> with
-    <span class="bold">${image.get('image_camera')}</span> on 
-    <span class="bold">${image.get('image_date')}</span>
-  </p>`;
+const MarsImageGrid = (image, rover) => {
+  console.log(image.toArray());
+  return image
+    .toArray()
+    .map((img) => {
+      return `<img src="${img}" class="section__imgGrid-img" alt="a picture taken by ${rover} from Mars" />`;
+    })
+    .join('');
 };
 
 const RoverDashboard = (roverInfo) => {
@@ -104,48 +107,43 @@ const RoverDashboard = (roverInfo) => {
   const landing_date = roverInfo.get('landing_date');
   const launch_date = roverInfo.get('launch_date');
   const status = roverInfo.get('status');
-  return `<ul class="dashboard">
+  return `
     <li>Rover: ${rover}</li>
     <li>Launch date: ${launch_date}</li>
     <li>Landing date: ${landing_date}</li>
     <li>Status: ${status}</li>
-  </ul>`;
+  `;
 };
 
 // ------------------------------------------------------  API CALLS
 const getRoverInfo = async (state) => {
   const rover = state.get('selectedRover');
-  if (!state.get('rovers').get(rover).get('image')) {
-    return await fetch('http://localhost:3000/rover', {
-      method: 'POST',
-      body: JSON.stringify({ rover }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+  return await fetch('http://localhost:3000/rover', {
+    method: 'POST',
+    body: JSON.stringify({ rover }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((res) => {
+      return res.json();
     })
-      .then((res) => {
-        return res.json();
-      })
-      .then((responseJSON) => {
-        const image = Immutable.Map({
-          image_src: responseJSON.image.img_src,
-          image_date: responseJSON.image.earth_date,
-          image_camera: responseJSON.image.camera.name,
-        });
-        const {
-          name,
-          launch_date,
-          landing_date,
-          status,
-        } = responseJSON.image.rover;
-        return state.setIn(
-          ['rovers', rover],
-          Immutable.Map({ image, name, launch_date, landing_date, status })
-        );
-      })
-      .catch((err) => {
-        console.log('error', err);
-      });
-  }
-  return state;
+    .then((responseJSON) => {
+      const image = Immutable.List(
+        responseJSON.image.map((img) => img.img_src)
+      );
+      const {
+        name,
+        launch_date,
+        landing_date,
+        status,
+      } = responseJSON.image[0].rover;
+      return state.setIn(
+        ['rovers', rover],
+        Immutable.Map({ image, name, launch_date, landing_date, status })
+      );
+    })
+    .catch((err) => {
+      console.log('error', err);
+    });
 };
